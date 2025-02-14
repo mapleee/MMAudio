@@ -1,3 +1,4 @@
+import gc
 import logging
 from argparse import ArgumentParser
 from datetime import datetime
@@ -58,9 +59,9 @@ net, feature_utils, seq_cfg = get_model()
 
 
 @torch.inference_mode()
-def video_to_audio(video: str, prompt: str, negative_prompt: str, seed: int, num_steps: int,
+def video_to_audio(video: gr.Video, prompt: str, negative_prompt: str, seed: int, num_steps: int,
                    cfg_strength: float, duration: float):
-    print(f"video: {video}")
+
     rng = torch.Generator(device=device)
     if seed >= 0:
         rng.manual_seed(seed)
@@ -91,7 +92,7 @@ def video_to_audio(video: str, prompt: str, negative_prompt: str, seed: int, num
     output_dir.mkdir(exist_ok=True, parents=True)
     video_save_path = output_dir / f'{current_time_string}.mp4'
     make_video(video_info, video_save_path, audio, sampling_rate=seq_cfg.sampling_rate)
-    print(f"video_save_path: {video_save_path}")
+    gc.collect()
     return video_save_path
 
 
@@ -130,6 +131,7 @@ def image_to_audio(image: gr.Image, prompt: str, negative_prompt: str, seed: int
     video_save_path = output_dir / f'{current_time_string}.mp4'
     video_info = VideoInfo.from_image_info(image_info, duration, fps=Fraction(1))
     make_video(video_info, video_save_path, audio, sampling_rate=seq_cfg.sampling_rate)
+    gc.collect()
     return video_save_path
 
 
@@ -162,6 +164,7 @@ def text_to_audio(prompt: str, negative_prompt: str, seed: int, num_steps: int, 
     output_dir.mkdir(exist_ok=True, parents=True)
     audio_save_path = output_dir / f'{current_time_string}.flac'
     torchaudio.save(audio_save_path, audio, seq_cfg.sampling_rate)
+    gc.collect()
     return audio_save_path
 
 
@@ -175,7 +178,7 @@ video_to_audio_tab = gr.Interface(
     Doing so does not improve results.
     """,
     inputs=[
-        gr.Text(label='Video File Path'),
+        gr.Video(),
         gr.Text(label='Prompt'),
         gr.Text(label='Negative prompt', value='music'),
         gr.Number(label='Seed (-1: random)', value=-1, precision=0, minimum=-1),
@@ -186,109 +189,107 @@ video_to_audio_tab = gr.Interface(
     outputs='playable_video',
     cache_examples=False,
     title='MMAudio — Video-to-Audio Synthesis',
-    allow_flagging="never",
-    # examples=[
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_beach.mp4',
-    #         'waves, seagulls',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_serpent.mp4',
-    #         '',
-    #         'music',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_seahorse.mp4',
-    #         'bubbles',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_india.mp4',
-    #         'Indian holy music',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_galloping.mp4',
-    #         'galloping',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_kraken.mp4',
-    #         'waves, storm',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/mochi_storm.mp4',
-    #         'storm',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/hunyuan_spring.mp4',
-    #         '',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/hunyuan_typing.mp4',
-    #         'typing',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/hunyuan_wake_up.mp4',
-    #         '',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    #     [
-    #         'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_nyc.mp4',
-    #         '',
-    #         '',
-    #         0,
-    #         25,
-    #         4.5,
-    #         10,
-    #     ],
-    # ]
-    )
+    examples=[
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_beach.mp4',
+            'waves, seagulls',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_serpent.mp4',
+            '',
+            'music',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_seahorse.mp4',
+            'bubbles',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_india.mp4',
+            'Indian holy music',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_galloping.mp4',
+            'galloping',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_kraken.mp4',
+            'waves, storm',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/mochi_storm.mp4',
+            'storm',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/hunyuan_spring.mp4',
+            '',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/hunyuan_typing.mp4',
+            'typing',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/hunyuan_wake_up.mp4',
+            '',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+        [
+            'https://huggingface.co/hkchengrex/MMAudio/resolve/main/examples/sora_nyc.mp4',
+            '',
+            '',
+            0,
+            25,
+            4.5,
+            10,
+        ],
+    ])
 
 text_to_audio_tab = gr.Interface(
     fn=text_to_audio,
@@ -335,9 +336,8 @@ image_to_audio_tab = gr.Interface(
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--port', type=int, default=7860)
-    parser.add_argument('--share', action='store_true')
     args = parser.parse_args()
 
     gr.TabbedInterface([video_to_audio_tab, text_to_audio_tab, image_to_audio_tab],
                        ['Video-to-Audio', 'Text-to-Audio', 'Image-to-Audio (experimental)']).launch(
-                           server_port=args.port, allowed_paths=[output_dir], share=args.share, show_error=True)
+                           server_port=args.port, allowed_paths=[output_dir])
