@@ -1,0 +1,62 @@
+# Luma视频生成API
+curl https://api.deerapi.com/dream-machine/v1/generations -H "Content-Type: application/json" -H "Authorization: Bearer sk-gVXv0e7epuaWwCSkZSuXJRs7zIsCCUz5yFdQu9frxCH105W7" -d '{
+  "prompt": "A tiger walking in snow",
+  "keyframes": {
+    "frame0": {
+      "type": "image",
+      "url": "https://storage.cdn-luma.com/dream_machine/7e4fe07f-1dfd-4921-bc97-4bcf5adea39a/video_0_thumb.jpg"
+    }
+  }
+}'
+
+# Luma视频生成API的Response Example
+{
+  "id": "7ca76429-99d1-46ab-bb2e-84baa4acdb04",
+  "state": "queued",
+  "failure_reason": null,
+  "created_at": "2024-11-27T13:50:56.313494Z",
+  "assets": null,
+  "version": null,
+  "request": {
+    "prompt": "A serene lake surrounded by mountains at sunset",
+    "aspect_ratio": "16:9",
+    "loop": true,
+    "keyframes": null,
+    "callback_url": "xxx"
+  }
+}
+
+# 单个查询任务API
+curl https://api.deerapi.com/dream-machine/v1/generations/bdafef17-c6b0-4ec6-8174-77a08eec9910 -H "Content-Type: application/json" -H "Authorization: Bearer sk-gVXv0e7epuaWwCSkZSuXJRs7zIsCCUz5yFdQu9frxCH105W7"
+
+# 单个查询任务API的Response Example
+{
+  "id": "32ec5549-7b7a-4111-a43b-445b3a89c8ef",
+  "liked": null,
+  "state": "completed",
+  "video": {
+    "url": "https://storage.cdn-luma.com/lit_lite_inference_v1.6-xl/5bf08990-71ed-4a56-b531-2c2f02e18f51/5f7ca010-7e0e-4faf-a654-f41ce735d0ff_watermarked_video05a8efbcf1ba2498bb02aa9dcefab47f8.mp4",
+    "width": 752,
+    "height": 1360,
+    "download_url": "https://dc53a917a6f427706a8ca3ecc7d70ea4.r2.cloudflarestorage.com/ai-lumalabs-storage/lit_lite_inference_v1.6-xl/5bf08990-71ed-4a56-b531-2c2f02e18f51/0af7d264-0ab5-45f1-befb-e382c81d8023_video05a8efbcf1ba2498bb02aa9dcefab47f8.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=60bf44f30d45b472f9dd032de33e15d1%2F20241015%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20241015T085653Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=9b40f281fd019016625bb2a4fcdf9f9625de3dba2f5c80178f6bd5e8c4304499"
+  },
+  "prompt": "Please generate a video simulating the gentle undulating heights of water waves and sand dunes, with more focus on the imagery of the Nile River, based on the reference of the ceramic tile product design.",
+  "thumbnail": {
+    "url": "https://storage.cdn-luma.com/lit_lite_inference_v1.6-xl/5bf08990-71ed-4a56-b531-2c2f02e18f51/59ce5a3c-8fad-4735-94f7-243040c63a4e_video_0_thumb.jpg",
+    "width": 752,
+    "height": 1360
+  },
+  "video_raw": {
+    "url": "https://storage.cdn-luma.com/lit_lite_inference_v1.6-xl/5bf08990-71ed-4a56-b531-2c2f02e18f51/0af7d264-0ab5-45f1-befb-e382c81d8023_video05a8efbcf1ba2498bb02aa9dcefab47f8.mp4",
+    "width": 752,
+    "height": 1360
+  },
+  "created_at": "2024-10-15T08:56:19.325Z",
+  "last_frame": {
+    "url": "https://storage.cdn-luma.com/lit_lite_inference_v1.6-xl/5bf08990-71ed-4a56-b531-2c2f02e18f51/0f434eba-2421-4abf-8a36-774abc3bf515_video_0_last_frame.jpg",
+    "width": 752,
+    "height": 1360
+  },
+  "queue_state": null,
+  "estimate_wait_seconds": null
+}
