@@ -1,8 +1,12 @@
+import os
 import requests
 import time
 import json
+from dotenv import load_dotenv
 
-API_KEY = "sk-gVXv0e7epuaWwCSkZSuXJRs7zIsCCUz5yFdQu9frxCH105W7"
+load_dotenv()
+
+API_KEY = os.getenv("LUMA_API_KEY")
 BASE_URL = "https://api.deerapi.com/dream-machine/v1"
 
 def generate_video(prompt):
@@ -61,7 +65,6 @@ def wait_for_video_generation(prompt):
         
         if state == "completed":
             # 返回生成的视频URL
-            print(status_response["video"]["url"])
             return status_response["video"]["url"]
         elif state == "failed":
             raise Exception(f"视频生成失败: {status_response.get('failure_reason')}")
