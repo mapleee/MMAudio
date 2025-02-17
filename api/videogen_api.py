@@ -1,81 +1,60 @@
-import os
-import requests
-import time
-import json
-from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+from typing import Optional
+from api.videogen_func import main
+import asyncio
+from fastapi.responses import JSONResponse
 
-load_dotenv()
+app = FastAPI(
+    title="Video Generation API",
+    description="API for generating videos from text prompts",
+    version="1.0.0"
+)
 
-API_KEY = os.getenv("LUMA_API_KEY")
-BASE_URL = "https://api.deerapi.com/dream-machine/v1"
+class VideoGenRequest(BaseModel):
+    prompt: str = Field(..., description="Text prompt for video generation")
+    aspect_ratio: str = Field(default="16:9", description="Aspect ratio of the video (e.g., '16:9', '1:1')")
+    loop: bool = Field(default=True, description="Whether the video should loop")
+    image_url: Optional[str] = Field(default=None, description="Optional reference image URL")
 
-def generate_video(prompt):
-    """发送视频生成请求"""
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
-    }
-    
-    payload = {
-        "prompt": prompt,
-        "aspect_ratio": "16:9",
-        "loop": True
-    }
-    
-    response = requests.post(
-        f"{BASE_URL}/generations",
-        headers=headers,
-        json=payload
+class VideoGenResponse(BaseModel):
+    status: str
+    message: str
+    video_url: Optional[str] = None
+    generation_id: Optional[str] = None
+
+@app.post("/api/v1/generate-video", response_model=VideoGenResponse)
+async def generate_video(request: VideoGenRequest):
+    try:
+        # 将同步操作转换为异步操作
+        video_url = await asyncio.to_thread(
+            main,
+            request.prompt,
+            aspect_ratio=request.aspect_ratio,
+            loop=request.loop,
+            image_url=request.image_url
+        )
+        
+        return VideoGenResponse(
+            status="success",
+            message="Video generated successfully",
+            video_url=video_url
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
+    return JSONResponse(
+        status_code=200,
+        content={"status": "healthy"}
     )
-    
-    if response.status_code == 201:
-        return response.json()["id"]
-    else:
-        raise Exception(f"视频生成请求失败: {response.text}")
-
-def check_generation_status(generation_id):
-    """查询视频生成状态"""
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
-    }
-    
-    response = requests.get(
-        f"{BASE_URL}/generations/{generation_id}",
-        headers=headers
-    )
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception(f"状态查询失败: {response.text}")
-
-def wait_for_video_generation(prompt):
-    """发起视频生成请求并等待完成"""
-    # 发送生成请求
-    generation_id = generate_video(prompt)
-    print(f"视频生成任务已创建，ID: {generation_id}")
-    
-    # 循环查询状态
-    while True:
-        status_response = check_generation_status(generation_id)
-        state = status_response.get("state")
-        
-        print(f"当前状态: {state}")
-        
-        if state == "completed":
-            # 返回生成的视频URL
-            return status_response["video"]["url"]
-        elif state == "failed":
-            raise Exception(f"视频生成失败: {status_response.get('failure_reason')}")
-        
-        # 等待30秒后再次查询
-        time.sleep(30)
 
 if __name__ == "__main__":
-    try:
-        prompt = "A tiger walking in snow"
-        video_url = wait_for_video_generation(prompt)
-        print(f"视频生成成功！URL: {video_url}")
-    except Exception as e:
-        print(f"错误: {str(e)}")
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
