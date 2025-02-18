@@ -1,3 +1,4 @@
+import os
 import logging
 from argparse import ArgumentParser
 from datetime import datetime
@@ -31,7 +32,9 @@ dtype = torch.bfloat16
 
 model: ModelConfig = all_model_cfg['large_44k_v2']
 model.download_if_needed()
-output_dir = Path('./output/gradio')
+# output_dir = Path('./output/gradio')
+output_dir = Path('/workspace/tmp')
+
 
 setup_eval_logging()
 
@@ -59,7 +62,7 @@ net, feature_utils, seq_cfg = get_model()
 
 @torch.inference_mode()
 def video_to_audio(video: str, prompt: str, negative_prompt: str, seed: int, num_steps: int,
-                   cfg_strength: float, duration: float):
+                   cfg_strength: float, duration: float, user_id: str, task_id: str):
     print(f"video: {video}")
     rng = torch.Generator(device=device)
     if seed >= 0:
@@ -87,9 +90,12 @@ def video_to_audio(video: str, prompt: str, negative_prompt: str, seed: int, num
                       cfg_strength=cfg_strength)
     audio = audios.float().cpu()[0]
 
-    current_time_string = datetime.now().strftime('%Y%m%d_%H%M%S')
-    output_dir.mkdir(exist_ok=True, parents=True)
-    video_save_path = output_dir / f'{current_time_string}.mp4'
+    # current_time_string = datetime.now().strftime('%Y%m%d_%H%M%S')
+    # output_dir.mkdir(exist_ok=True, parents=True)
+    # video_save_path = output_dir / f'{current_time_string}.mp4'
+    _output_dir = f"/workspace/tmp/{user_id}" if user_id else "/workspace/tmp"
+    os.makedirs(_output_dir, exist_ok=True)
+    video_save_path = f"{_output_dir}/soundful_video_{task_id}.mp4"
     make_video(video_info, video_save_path, audio, sampling_rate=seq_cfg.sampling_rate)
     print(f"video_save_path: {video_save_path}")
     return video_save_path
@@ -182,6 +188,8 @@ video_to_audio_tab = gr.Interface(
         gr.Number(label='Num steps', value=25, precision=0, minimum=1),
         gr.Number(label='Guidance Strength', value=4.5, minimum=1),
         gr.Number(label='Duration (sec)', value=8, minimum=1),
+        gr.Text(label='User ID'),
+        gr.Text(label='Task ID'),
     ],
     outputs='playable_video',
     cache_examples=False,
@@ -335,9 +343,10 @@ image_to_audio_tab = gr.Interface(
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--port', type=int, default=7860)
+    parser.add_argument('--host', type=str, default="0.0.0.0")
     parser.add_argument('--share', action='store_true')
     args = parser.parse_args()
 
     gr.TabbedInterface([video_to_audio_tab, text_to_audio_tab, image_to_audio_tab],
                        ['Video-to-Audio', 'Text-to-Audio', 'Image-to-Audio (experimental)']).launch(
-                           server_port=args.port, allowed_paths=[output_dir], share=args.share, show_error=True)
+                           server_port=args.port, allowed_paths=[output_dir], share=args.share, show_error=True, server_name=args.host)

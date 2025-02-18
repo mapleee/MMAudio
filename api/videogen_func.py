@@ -1,10 +1,10 @@
 import time
 from api.videogen_api_utils import generate_video, check_generation_status
 
-def main(prompt, aspect_ratio="16:9", loop=True, image_url=None):
+def main(prompt, aspect_ratio="16:9", image_url=None):
     """发起视频生成请求并等待完成"""
     # 发送生成请求
-    generation_id = generate_video(prompt, aspect_ratio=aspect_ratio, loop=loop, image_url=image_url)
+    generation_id = generate_video(prompt, aspect_ratio=aspect_ratio, loop=True, image_url=image_url)
     print(f"视频生成任务已创建，ID: {generation_id}")
     
     # 循环查询状态
