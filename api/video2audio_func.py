@@ -2,6 +2,7 @@ from gradio_client import Client
 
 def video2audio(video_path, user_id, task_id):
 	client = Client("http://0.0.0.0:7860/")
+	print(f"生成有声视频: {video_path}")
 	result = client.predict(
 			video=video_path,
 			prompt="",
@@ -14,4 +15,5 @@ def video2audio(video_path, user_id, task_id):
 			task_id=task_id,
 			api_name="/predict"
 	)
-	print(result)
+	print(f"生成有声视频完成: {result}")
+	return result

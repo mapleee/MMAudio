@@ -191,7 +191,7 @@ video_to_audio_tab = gr.Interface(
         gr.Text(label='User ID'),
         gr.Text(label='Task ID'),
     ],
-    outputs='playable_video',
+    outputs='text',
     cache_examples=False,
     title='MMAudio — Video-to-Audio Synthesis',
     allow_flagging="never",

@@ -86,12 +86,12 @@ def main(prompt, aspect_ratio="16:9", image_url=None, user_id="00000000000000000
                 print(f"视频已下载到: {video_path}")
 
                 # 生成有声视频
-                soundful_video_object = video2audio(
+                soundful_video_path = video2audio(
                     video_path=video_path,
                     user_id=user_id,
                     task_id=generation_id
                 )
-                return soundful_video_object
+                return soundful_video_path
             except Exception as e:
                 print(f"下载失败: {str(e)}")
                 return url
@@ -105,7 +105,7 @@ def main(prompt, aspect_ratio="16:9", image_url=None, user_id="00000000000000000
 if __name__ == "__main__":
     soundful_video_path = video2audio(
         video_path="/workspace/tmp/video_ff399c40-f9ee-46b6-8043-b51ddee54e73.mp4",
-        user_id="00000000000000000000000000000000",
+        user_id="00000000000000000000000000000012",
         task_id="ff399c40-f9ee-46b6-8043-b51ddee54e73"
     )
     exit()
