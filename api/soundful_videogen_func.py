@@ -93,7 +93,7 @@ def main(prompt, aspect_ratio="16:9", image_url=None, user_id="00000000000000000
                 )
                 return soundful_video_path
             except Exception as e:
-                print(f"下载失败: {str(e)}")
+                print(f"失败: {str(e)}")
                 return url
         elif state == "failed":
             raise Exception(f"视频生成失败: {status_response.get('failure_reason')}")
