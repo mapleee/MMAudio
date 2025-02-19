@@ -51,7 +51,7 @@ class Video2AudioResponse(BaseModel):
     status: str
     message: str
     task_id: str
-    audio_url: Optional[str] = None
+    video_url: Optional[str] = None
 
 async def process_single_task(task_data: dict):
     task_id = task_data["task_id"]
@@ -67,7 +67,7 @@ async def process_single_task(task_data: dict):
         redis_client.set(f"{TASK_PREFIX}{task_id}", json.dumps(task_info))
         
         try:
-            audio_url = await asyncio.to_thread(
+            video_url = await asyncio.to_thread(
                 video2audio,
                 task_data["video_path"],
                 task_data["user_id"],
@@ -81,7 +81,7 @@ async def process_single_task(task_data: dict):
                 "status": TaskState.COMPLETED,
                 "completed_at": datetime.now().isoformat(),
                 "updated_at": datetime.now().isoformat(),
-                "result": {"audio_url": audio_url}
+                "result": {"video_url": video_url}
             })
         except Exception as e:
             # 更新任务状态为失败
