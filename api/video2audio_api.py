@@ -36,6 +36,8 @@ class TaskState:
 class Video2AudioRequest(BaseModel):
     video_path: str = Field(..., description="Path to the video file")
     user_id: str = Field(default="00000000000000000000000000000000", description="User ID")
+    prompt: str = Field(default="", description="Prompt for the audio")
+    negative_prompt: str = Field(default="music", description="Negative prompt for the audio")
 
 class TaskStatus(BaseModel):
     task_id: str
@@ -69,7 +71,9 @@ async def process_single_task(task_data: dict):
                 video2audio,
                 task_data["video_path"],
                 task_data["user_id"],
-                task_id
+                task_id,
+                task_data["prompt"],
+                task_data["negative_prompt"],
             )
             
             # 更新任务状态为完成
@@ -141,6 +145,8 @@ async def convert_video_to_audio(request: Video2AudioRequest):
         "task_id": task_id,
         "video_path": request.video_path,
         "user_id": request.user_id,
+        "prompt": request.prompt,
+        "negative_prompt": request.negative_prompt,
         "created_at": created_time
     }
     pipe.rpush(QUEUE_KEY, json.dumps(task_data))
