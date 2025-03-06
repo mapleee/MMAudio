@@ -9,7 +9,8 @@ import json
 import uuid
 from datetime import datetime
 from asyncio import Queue, Task
-from api.video_upload import router as video_router
+# from api.video_upload import router as video_router
+from api.video_transport_router import router as storage_router
 
 
 app = FastAPI(
@@ -17,7 +18,8 @@ app = FastAPI(
     description="API for generating audio from video",
     version="1.0.0"
 )
-app.include_router(video_router)
+# app.include_router(video_router)
+app.include_router(storage_router)
 
 # Redis 配置
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
