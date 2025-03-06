@@ -80,7 +80,6 @@ async def process_single_task(task_data: dict):
                 task_data["prompt"],
                 task_data["negative_prompt"],
             )
-            
             # 更新任务状态为完成
             task_info.update({
                 "status": TaskState.COMPLETED,

@@ -25,6 +25,8 @@ def upload_blob(bucket_name="soundful", source_file_name="/workspace/tmp/user123
         f"File {source_file_name} uploaded to {destination_blob_name}."
     )
 
+    return destination_blob_name
+
 
 def download_blob(bucket_name="soundful", source_blob_name="public/uploads/20250219_104422.mp4", destination_file_name="/workspace/tmp/user123/20250219_104422.mp4"):
     """Downloads a blob from the bucket."""
@@ -45,6 +47,9 @@ def download_blob(bucket_name="soundful", source_blob_name="public/uploads/20250
         )
     )
 
+    return destination_file_name
+
+
 if __name__ == "__main__":
-    upload_blob()
-    # download_blob()
+    # upload_blob()
+    download_blob()
